@@ -74,7 +74,7 @@ The VFA concept may be subject to patent applications.
 The specification in this repository is published to support
 open research and interoperable implementations.
 
-See the `PATENTS` file for additional information.
+See the [PATENTS](PATENTS) file for additional information.
 
 ---
 
