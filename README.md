@@ -2,6 +2,8 @@
 
 Virtual Flow Agreement — Protocol Specification
 
+Method and System for Cryptographically Verified Multi-Entity Intent Handshake and Delegated Execution of Digital Transactions
+
 This repository contains the **protocol specification** for the Virtual Flow Agreement (VFA) concept.
 
 VFA defines a cryptographic intent verification layer for digital interactions, enabling applications and gateways to verify user consent and policy compliance before allowing access to protected services.
@@ -20,8 +22,8 @@ The specification describes:
 
 Implementation and demonstration projects:
 
-- **VFA-MVP** — reference implementation of the handshake flow
-- **VFA-Lab** — architecture sandbox and gateway routing demo
+- **VFA-MVP** — reference implementation of the handshake flow → https://github.com/Csnyi/VFA-MVP
+- **VFA-Lab** — architecture sandbox and gateway routing demo → https://github.com/Csnyi/VFA-Lab
 
 ---
 
@@ -49,9 +51,30 @@ VFA-Spec
 ├─ SECURITY_MODEL.md
 ├─ THREAT_MODEL.md
 ├─ CHANGELOG.md
+├─ PATENTS
+├─ LICENSE
 ├─ diagrams/
 └─ examples/
 ```
+
+---
+
+## Specification License
+
+The VFA specification is released under the Apache 2.0 license.
+
+This allows independent implementations of the protocol.
+
+---
+
+## Intellectual Property
+
+The VFA concept may be subject to patent applications.
+
+The specification in this repository is published to support
+open research and interoperable implementations.
+
+See the `PATENTS` file for additional information.
 
 ---
 
