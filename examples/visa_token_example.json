@@ -1,0 +1,10 @@
+{
+  "tokenId": "tok-abc123",
+  "issuer": "vfa.example",
+  "subject": "user123",
+  "aud": "merchant.example",
+  "scope": "login",
+  "iat": 1710000000,
+  "exp": 1710000300,
+  "nonce": "abcxyz"
+}

@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant Merchant
+  participant Wallet
+  participant Issuer
+  participant Gateway
+  participant Service
+
+  Merchant->>Wallet: Handshake request
+  Wallet->>Wallet: User reviews request
+  Wallet->>Issuer: ACCEPT / REJECT
+  Issuer-->>Merchant: Visa token (if accepted)
+  Merchant->>Gateway: Request + visa token
+  Gateway->>Gateway: Verify token + apply policy
+  Gateway->>Service: Forward or route request

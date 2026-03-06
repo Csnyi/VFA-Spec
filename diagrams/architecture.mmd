@@ -1,0 +1,7 @@
+flowchart LR
+  W[Wallet] --> M[Merchant]
+  M --> G[Gateway]
+  G --> P[Protected Service]
+  I[Issuer / Verification Server] --> G
+  W -. approval .-> I
+  M -. request .-> I

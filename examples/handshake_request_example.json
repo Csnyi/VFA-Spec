@@ -1,0 +1,7 @@
+{
+  "requestId": "req-12345",
+  "merchant": "merchant.example",
+  "scope": "login",
+  "ttl": 300000,
+  "nonce": "abcxyz"
+}
