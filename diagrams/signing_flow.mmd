@@ -1,0 +1,48 @@
+sequenceDiagram
+  participant U as User
+  participant W as Wallet
+  participant M as Merchant
+  participant G as Verification Gateway
+  participant B as Backend
+  participant A as Audit Log
+
+  U->>M: Request action (e.g. purchase)
+  M->>W: Intent request
+  Note right of M: {action, params, merchantId,<br/>endpoint, nonce, expiry}
+
+  W->>U: Display human-readable intent
+  U->>W: Approve
+
+  W->>W: Sign intent
+  Note right of W: intentHash = Hash(canonical(intent))<br/>signature = Sign(intentHash, walletPrivKey)
+
+  W->>M: Signed intent {intent + signature}
+  Note right of M: Passthrough only —<br/>no modification permitted.<br/>Gateway rejects any field<br/>not covered by signature.
+
+  M->>G: Submit {intent + signature}
+
+  G->>G: Verify signature
+  Note right of G: Verify Sign(intentHash, walletPubKey)
+  G->>G: Verify nonce uniqueness
+  G->>G: Verify expiry (≤ 60 s)
+  G->>G: Verify context binding
+  Note right of G: merchantId + endpoint + userId<br/>must match signed payload
+  G->>G: Commit intentHash
+  Note right of G: Intent commitment —<br/>prevents reinterpretation.<br/>Execution proceeds only<br/>against committed intentHash.
+
+  G->>B: Dispatch execution(intentHash)
+  B->>B: Execute operation
+
+  B->>G: Execution receipt
+  Note right of B: receipt = Sign(intentHash + result,<br/>backendPrivKey)
+
+  G->>G: Verify receipt binds to committed intentHash
+  G->>A: Append audit record
+  Note right of A: hash-chain audit log:<br/>{intentHash, receipt, timestamp,<br/>merchantId, userId}
+
+  G->>M: Result + receipt
+  M->>W: Return receipt
+
+  W->>W: Verify receipt matches intentHash
+  Note right of W: Confirms executed action matches<br/>what the user originally signed.
+  W->>U: Display verified result

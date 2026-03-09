@@ -1,0 +1,23 @@
+flowchart LR
+  U["User"]
+  W["Wallet"]
+  M["Merchant"]
+  G["Verification Gateway"]
+  B["Backend"]
+  A[("Audit Log")]
+
+  U -->|"request action"| M
+  M -->|"intent request"| W
+  W -->|"display & approve"| U
+  W -->|"sign intent\nSign(intentHash, walletPrivKey)"| M
+
+  M -->|"passthrough only —\nno modification permitted"| G
+
+  G -->|"verify signature\nnonce · expiry · context binding\ncommit intentHash"| B
+
+  B -->|"execution receipt\nSign(intentHash + result)"| G
+
+  G -->|"append\nhash-chain record"| A
+  G -->|"result + receipt"| M
+  M -->|"receipt"| W
+  W -->|"verify receipt\nmatches intentHash"| U
