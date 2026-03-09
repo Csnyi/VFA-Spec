@@ -7,5 +7,6 @@
   "endpoint": "/payments",
   "nonce": "abcxyz128bit",
   "iat": 1710000000,
-  "exp": 1710000060
+  "exp": 1710000060,
+  "kid": "vfa-key-2024-01"
 }

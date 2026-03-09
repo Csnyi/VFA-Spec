@@ -44,6 +44,11 @@ The following fields are normative for VFA v0.1 tokens.
 | `nonce` | string | yes | replay protection value; must be unique per token |
 | `iat` | number | yes | issued-at timestamp (Unix epoch seconds) |
 | `exp` | number | yes | expiration timestamp (Unix epoch seconds) |
+| `kid` | string | optional in v0.1, **required in production** | key identifier; enables key rotation without token reissuance |
+
+> `kid` MUST be included in production deployments. The gateway uses it to
+> select the correct issuer public key for signature verification. Without
+> `kid`, key rotation requires coordinated cutover across all gateway nodes.
 
 Additional optional fields MAY be defined by implementations.
 
@@ -61,7 +66,8 @@ Additional optional fields MAY be defined by implementations.
   "endpoint": "/payments",
   "nonce": "abcxyz128bit",
   "iat": 1710000000,
-  "exp": 1710000060
+  "exp": 1710000060,
+  "kid": "vfa-key-2024-01"
 }
 ```
 

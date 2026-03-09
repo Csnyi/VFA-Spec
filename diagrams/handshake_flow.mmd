@@ -3,12 +3,27 @@ sequenceDiagram
   participant Wallet
   participant Issuer
   participant Gateway
-  participant Service
+  participant Backend
 
   Merchant->>Wallet: Handshake request
+  Note right of Merchant: {merchantId, scope, endpoint,<br/>ttlMs, nonce}
+
   Wallet->>Wallet: User reviews request
-  Wallet->>Issuer: ACCEPT / REJECT
-  Issuer-->>Merchant: Visa token (if accepted)
+
+  alt User approves
+    Wallet->>Issuer: Approval confirmation
+    Issuer-->>Merchant: Visa token
+    Note right of Issuer: signed {iss, sub, merchantId,<br/>aud, scope, endpoint,<br/>nonce, iat, exp, kid}
+  else User rejects
+    Wallet-->>Merchant: REJECT — no token issued
+  end
+
   Merchant->>Gateway: Request + visa token
-  Gateway->>Gateway: Verify token + apply policy
-  Gateway->>Service: Forward or route request
+  Gateway->>Gateway: Verify token
+  Note right of Gateway: signature · exp · nonce<br/>merchantId · endpoint · aud
+
+  alt Token valid
+    Gateway->>Backend: Forward verified request
+  else Token invalid
+    Gateway-->>Merchant: 401 Unauthorized
+  end

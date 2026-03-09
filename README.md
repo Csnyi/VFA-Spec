@@ -70,6 +70,7 @@ Implementation and demonstration projects:
 | [TOKEN_FORMAT.md](TOKEN_FORMAT.md) | Visa token structure and fields |
 | [SECURITY_MODEL.md](SECURITY_MODEL.md) | Security assumptions and design |
 | [THREAT_MODEL.md](THREAT_MODEL.md) | Threat analysis |
+| [GLOSSARY.md](GLOSSARY.md) | Authoritative terminology definitions |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
 
 ---
@@ -84,6 +85,7 @@ VFA-Spec
 ├─ TOKEN_FORMAT.md
 ├─ SECURITY_MODEL.md
 ├─ THREAT_MODEL.md
+├─ GLOSSARY.md
 ├─ CHANGELOG.md
 ├─ PATENTS
 ├─ LICENSE
