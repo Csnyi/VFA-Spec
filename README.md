@@ -18,6 +18,40 @@ The specification describes:
 
 ---
 
+## Trust Model (v0.1)
+
+VFA v0.1 uses an **issuer-signed visa token model**.
+
+Roles:
+
+- **Wallet** — collects explicit user approval for an action
+- **Issuer** — mints a short-lived visa token based on the approved intent
+- **Merchant** — presents the visa token when calling the protected service
+- **Gateway** — verifies the visa token and enforces policy
+- **Backend** — executes only verified requests
+
+Flow summary:
+
+1. Merchant creates a handshake request
+2. User approves the request in the wallet
+3. Issuer generates a **visa token**
+4. Merchant sends request + visa token
+5. Gateway verifies token and enforces policy
+6. Backend executes the request
+
+The **visa token** is the cryptographic artifact binding:
+
+- identity
+- declared intent
+- policy scope
+- expiration
+
+> The wallet-signed intent model (where the user's wallet directly signs the
+> artifact rather than an issuer) is considered a future extension and is not
+> normative in v0.1.
+
+---
+
 ## Related repositories
 
 Implementation and demonstration projects:
@@ -85,3 +119,18 @@ Draft specification.
 Version: **v0.1**
 
 This repository is experimental and may evolve as the VFA architecture matures.
+
+---
+
+## Delegation
+
+Delegated authorization is considered a future extension.
+
+Potential fields include:
+
+- `delegator`
+- `delegate`
+- `delegationScope`
+- `delegationExp`
+
+Delegation is not normative in VFA v0.1.

@@ -8,45 +8,36 @@ The VFA handshake ensures that a user or controlling entity explicitly approves 
 
 - **Wallet** — user-controlled approval interface
 - **Merchant** — requesting application or relying party
-- **Issuer / Verification server** — component issuing or validating visa tokens
-- **Gateway** — policy enforcement point
+- **Issuer** — authority minting and signing visa tokens
+- **Gateway** — policy enforcement and verification point
+- **Backend** — protected service executing verified requests
+
+> In some deployments the Issuer and Gateway may be co-located, but they represent distinct logical roles.
 
 ---
 
-## High-level flow
+## Protocol Flow (v0.1)
 
-1. Merchant creates a handshake request.
-2. Wallet receives or scans the request.
-3. User accepts or rejects the request.
-4. If accepted, an issuer creates a visa token.
-5. Merchant presents the visa token with the protected request.
-6. Gateway verifies the token and applies policy.
-
----
-
-## Handshake request example
+### Step 1 — Merchant creates a handshake request
 
 ```json
 {
   "requestId": "req-12345",
-  "merchant": "merchant.example",
+  "merchantId": "merchant.example",
   "scope": "payment:init",
-  "ttl": 300000,
-  "nonce": "abcxyz"
+  "endpoint": "/payments",
+  "ttlMs": 300000,
+  "nonce": "abcxyz128bit"
 }
 ```
 
-### Suggested fields
+`ttlMs` defines the user-facing approval window in **milliseconds** (how long the wallet displays the request). It is distinct from the token's `exp` field.
 
-- `requestId` — unique request identifier
-- `merchant` — requesting party identity
-- `scope` — requested action or permission set
-- `ttl` — lifetime in milliseconds
-- `nonce` — freshness value
+### Step 2 — Wallet displays the request to the user
 
----
+The wallet renders the intent summary independently from the merchant's UI, based on the structured schema.
 
-## User decision
+### Step 3 — User approves or rejects
 
 The wallet returns one of two decisions:
 
@@ -55,23 +46,47 @@ The wallet returns one of two decisions:
 
 A rejected request must not produce a visa token.
 
+### Step 4 — Issuer generates a visa token
+
+On acceptance, the **issuer** mints a short-lived visa token (see [TOKEN_FORMAT.md](TOKEN_FORMAT.md)) binding the approved scope, identity, merchant, endpoint, and expiration.
+
+Token lifetime in production: **≤ 60 seconds** (`exp - iat`).
+
+### Step 5 — Merchant sends request with token
+
+```http
+POST /payments HTTP/1.1
+Host: gateway.example
+Authorization: Bearer <visa_token>
+Content-Type: application/json
+```
+
+### Step 6 — Gateway verifies the token
+
+The gateway checks:
+
+- signature (issuer public key)
+- expiration (`exp`)
+- nonce uniqueness (deduplication store)
+- merchant and endpoint binding (`merchantId`, `endpoint`)
+- scope match
+
+### Step 7 — If valid, request is forwarded to backend
+
+The backend executes only against the verified, committed intent.
+
 ---
 
-## Result of acceptance
+## Handshake request fields
 
-If the request is accepted, the issuer returns a short-lived visa token containing the approved scope and time limits.
-
----
-
-## Gateway behavior
-
-On receiving a request carrying a visa token, the gateway should:
-
-1. parse the token
-2. verify its signature
-3. validate expiration and scope
-4. check replay and revocation controls if implemented
-5. apply routing or allow/deny policy
+| Field | Required | Meaning |
+|-------|----------|---------|
+| `requestId` | yes | unique request identifier |
+| `merchantId` | yes | requesting party identity |
+| `scope` | yes | requested operation category |
+| `endpoint` | yes | target API endpoint |
+| `ttlMs` | yes | approval window in milliseconds |
+| `nonce` | yes | freshness value for replay protection |
 
 ---
 
@@ -86,5 +101,5 @@ On receiving a request carrying a visa token, the gateway should:
 
 ## v0.1 note
 
-This document intentionally describes the handshake at a conceptual level.
-A stricter wire format and interoperability rules can be defined in later versions.
+This document describes the handshake at a normative conceptual level for v0.1.
+A stricter wire format and interoperability test suites can be defined in later versions.

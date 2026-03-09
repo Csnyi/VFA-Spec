@@ -1,33 +1,36 @@
 # Threat Model — Cryptographic Intent Verification System
 
-This document covers threat categories relevant to a three-party intent verification
-architecture: **user wallet → merchant frontend → API gateway → backend services**.
+This document covers threat categories relevant to the VFA four-party intent verification
+architecture: **user wallet → merchant frontend → issuer → API gateway → backend services**.
 
-The wallet signs intents; the gateway verifies and executes them.
+In VFA v0.1, the **issuer** signs and mints visa tokens based on explicit user approval collected by the wallet.
 The merchant frontend is treated as a potentially hostile intermediary.
+
+> **Terminology note:** This document uses "intent" to refer to the user-approved action declaration,
+> and "visa token" for the issuer-signed cryptographic artifact. These are distinct concepts.
 
 ---
 
-## Token / Intent Replay
+## T-01: Token Replay
 
-An attacker reuses a valid, signed intent after initial issuance.
+Threat: An attacker reuses a previously issued, valid visa token.
 
 ### Variants
-- **Network replay** — captured intent re-sent from a MITM position
-- **Merchant-driven replay** — merchant stores and re-submits an intent later
-- **Cross-context replay** — intent reused against a different merchant or endpoint
+- **Network replay** — captured token re-sent from a MITM position
+- **Merchant-driven replay** — merchant stores and re-submits a token later
+- **Cross-context replay** — token reused against a different merchant or endpoint
 
 ### Mitigations
-- Short intent lifetime (≤ 60 s), enforced server-side
-- 128-bit CSPRNG nonce per intent; server-side nonce deduplication store
-- Context binding: `merchantId` + `endpoint` + `userId` included in the signed payload
+- Short token lifetime (**≤ 60 s**), enforced via `exp` field server-side
+- 128-bit CSPRNG nonce per token; server-side nonce deduplication store
+- Context binding: `merchantId` + `endpoint` + `sub` included in the signed payload
 - Idempotency keys on the API
 
 ---
 
-## Token / Intent Forgery
+## T-02: Token Forgery
 
-An attacker constructs a fake intent or modifies a signed one.
+Threat: An attacker constructs a fake visa token or modifies a signed one.
 
 ### Mitigations
 - Ed25519 or ECDSA P-256 signatures; PKCS#1 v1.5 and `alg: none` disallowed
@@ -113,19 +116,21 @@ The merchant frontend actively manipulates the intent to the user's detriment.
 
 ---
 
-## Execution Mismatch
+## T-08: Execution Mismatch
 
-The backend executes an action different from the signed and verified intent —
+Threat: The backend executes an action different from the signed and verified intent —
 the gap between gateway verification and actual backend dispatch.
 
 ### Mitigations
-- Intent commitment: gateway commits to the `intentHash` before dispatching to the backend;
-  backend executes only against the committed intent, never a re-interpreted version
+- Intent commitment: gateway commits to the `intentHash` (a hash of the verified visa token payload)
+  before dispatching to the backend; backend executes only against the committed intent
 - Execution receipt returned by the backend and validated by the gateway against
   the original `intentHash`; gateway rejects any response not bound to the committed intent
-- Execution result verified by the wallet: the wallet validates the receipt against
-  the `intentHash` it signed, giving the user an independent end-to-end check
+- Execution result may be independently verified by the wallet against the approved intent summary
+  (future extension — not normative in v0.1)
 - Gateway verification performed immediately before dispatch (not cached from an earlier step)
+
+> Note: `intentHash` is a gateway-internal binding mechanism; it is not a token field in v0.1.
 
 ---
 
@@ -250,22 +255,22 @@ introducing new delegation and attestation risks.
 
 ## Threat Summary
 
-| ID   | Category                                   | Severity        |
-|------|--------------------------------------------|-----------------|
-| T-01 | Intent Replay (network / merchant / cross-context) | Critical |
-| T-02 | Intent Forgery                             | Critical |
-| T-03 | Audience and Context Confusion             | High |
-| T-04 | Scope Escalation                           | High |
-| T-05 | Downgrade Attack                           | High |
-| T-06 | Impersonation (merchant / gateway / user)  | Critical |
-| T-07 | Compromised Merchant Behavior              | Critical |
-| T-08 | Execution Mismatch                         | Critical |
-| T-09 | Approval Fatigue                           | High |
-| T-10 | Policy Bypass and Lateral Movement         | Critical |
-| T-11 | Intent Laundering                          | High |
-| T-12 | Unauthorized Direct Access                 | High |
-| T-13 | Key Compromise                             | Critical |
-| T-14 | Revocation Failures                        | High |
-| T-15 | Delegation Abuse                           | High |
-| T-16 | Audit Integrity Failures                   | High |
-| T-17 | AI Agent Interactions                      | High / Critical |
+| ID   | Category                                          | Severity        |
+|------|---------------------------------------------------|-----------------|
+| T-01 | Token Replay (network / merchant / cross-context) | Critical        |
+| T-02 | Token Forgery                                     | Critical        |
+| T-03 | Audience and Context Confusion                    | High            |
+| T-04 | Scope Escalation                                  | High            |
+| T-05 | Downgrade Attack                                  | High            |
+| T-06 | Impersonation (merchant / gateway / user)         | Critical        |
+| T-07 | Compromised Merchant Behavior                     | Critical        |
+| T-08 | Execution Mismatch                                | Critical        |
+| T-09 | Approval Fatigue                                  | High            |
+| T-10 | Policy Bypass and Lateral Movement                | Critical        |
+| T-11 | Intent Laundering                                 | High            |
+| T-12 | Unauthorized Direct Access                        | High            |
+| T-13 | Key Compromise                                    | Critical        |
+| T-14 | Revocation Failures                               | High            |
+| T-15 | Delegation Abuse                                  | High            |
+| T-16 | Audit Integrity Failures                          | High            |
+| T-17 | AI Agent Interactions                             | High / Critical |

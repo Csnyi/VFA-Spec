@@ -1,7 +1,8 @@
 {
   "requestId": "req-12345",
-  "merchant": "merchant.example",
-  "scope": "login",
-  "ttl": 300000,
-  "nonce": "abcxyz"
+  "merchantId": "merchant.example",
+  "scope": "payment:init",
+  "endpoint": "/payments",
+  "ttlMs": 300000,
+  "nonce": "abcxyz128bit"
 }

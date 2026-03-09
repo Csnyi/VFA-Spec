@@ -46,11 +46,13 @@ This layer may evaluate:
 
 ---
 
-## Policy layer model
+## Conceptual Policy Layer
 
-In conceptual terms, VFA can be viewed as an optional **policy layer** influencing traffic decisions between network transport and application handling.
+The VFA policy layer is a **conceptual admission layer** responsible for verifying declared intent before protected resources are accessed.
 
-This is not a literal OSI standard layer, but a useful architectural model for reasoning about trust enforcement.
+This layer is not a literal OSI layer.
+
+In current implementations (v0.1), verification occurs at the gateway after TLS termination, as part of the request handling pipeline — logically between transport and application processing.
 
 ---
 

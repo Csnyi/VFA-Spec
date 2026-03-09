@@ -1,10 +1,11 @@
 {
-  "tokenId": "tok-abc123",
-  "issuer": "vfa.example",
-  "subject": "user123",
-  "aud": "merchant.example",
-  "scope": "login",
+  "iss": "vfa.example",
+  "sub": "user123",
+  "merchantId": "merchant.example",
+  "aud": "gateway.example",
+  "scope": "payment:init",
+  "endpoint": "/payments",
+  "nonce": "abcxyz128bit",
   "iat": 1710000000,
-  "exp": 1710000300,
-  "nonce": "abcxyz"
+  "exp": 1710000060
 }
