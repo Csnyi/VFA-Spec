@@ -54,6 +54,88 @@ Additional optional fields MAY be defined by implementations.
 
 ---
 
+## Scope Semantics
+
+The `scope` field declares the category of operation that the user
+explicitly authorizes. The gateway uses this value to enforce policy
+before dispatching a request to the backend.
+
+In VFA v0.1, the scope value is defined by the service deployment
+and enforced by the gateway policy configuration.
+
+### Scope format
+
+The recommended format is:
+
+`namespace:action`
+
+Where:
+
+- `namespace` identifies the functional domain or service
+- `action` identifies the operation being authorized
+
+Examples:
+
+```
+payment:init
+payment:capture
+payment:refund
+account:update
+document:sign
+```
+
+The `namespace:action` format is **RECOMMENDED** for interoperability and
+readability. Implementations MAY use alternative strings if they follow
+local policy conventions, but gateways MUST enforce exact string matching.
+
+### Scope authority
+
+The set of valid scopes is defined by the protected service deployment
+and configured in the gateway policy layer.
+
+The issuer MUST include the scope in the signed visa token payload.
+The gateway MUST verify that the scope value is authorized for the
+target endpoint.
+
+Example policy rule:
+
+| Endpoint | Allowed scope |
+|----------|---------------|
+| `/payments/init` | `payment:init` |
+| `/payments/refund` | `payment:refund` |
+
+If the scope in the visa token does not match the expected scope for
+the endpoint, the gateway MUST reject the request.
+
+### Scope binding
+
+The scope is part of the signed token payload and therefore protected
+by the issuer signature.
+
+A scope issued for one operation MUST NOT authorize a different
+operation, even if other token fields match.
+
+Example:
+
+```
+scope: payment:init
+endpoint: /payments/init
+```
+
+MUST NOT be accepted for:
+
+```
+endpoint: /payments/refund
+```
+
+### Extensibility
+
+Future versions of VFA may introduce standardized scope namespaces or
+registry mechanisms. In v0.1, scope definitions remain deployment-local
+and are enforced by the gateway policy configuration.
+
+---
+
 ## Example payload
 
 ```json

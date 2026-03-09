@@ -99,6 +99,101 @@ The backend executes only against the verified, committed intent.
 
 ---
 
+## Error and Rejection Handling
+
+VFA v0.1 defines both a successful authorization path and explicit failure paths.
+A protected interaction MUST proceed only if the visa token is valid and the
+gateway verification succeeds immediately before dispatch.
+
+### User rejection
+
+If the user rejects the handshake request in the wallet, the issuer MUST NOT
+mint a visa token.
+
+The merchant MAY receive a rejection result from the issuer or wallet-facing
+approval channel, for example:
+
+- `status: rejected`
+- `reason: user_rejected`
+
+In this case, the flow terminates and no protected request may be sent to the
+gateway for that interaction.
+
+### Expired or abandoned approval
+
+If the user does not approve the handshake request within the approval window
+defined by `ttlMs`, the request is considered expired.
+
+After expiry:
+
+- the wallet MUST treat the request as no longer actionable
+- the issuer MUST NOT mint a visa token for that request
+- the merchant MUST obtain a new handshake request before retrying
+
+A long approval window does not extend token validity and does not authorize
+late issuance.
+
+### Invalid or unacceptable token
+
+If the merchant sends a request with a missing, invalid, expired, replayed,
+or context-mismatched visa token, the gateway MUST reject the request and
+MUST NOT forward it to the backend.
+
+Examples of invalidity include:
+
+- signature verification failure
+- unknown or unacceptable `kid`
+- `exp` already elapsed
+- nonce replay detected
+- `aud`, `merchantId`, `endpoint`, or `scope` mismatch
+- malformed token encoding
+- token lifetime exceeds policy
+- actual HTTP request does not match the signed token fields
+
+In these cases, the gateway returns an authorization failure response.
+A typical HTTP mapping is:
+
+- `401 Unauthorized` for missing, malformed, expired, or unverifiable token
+- `403 Forbidden` for validly formed but policy-disallowed or context-mismatched token
+
+Implementations MAY choose different status codes, but they MUST preserve the
+security property that failed verification results in no backend dispatch.
+
+### Error response guidance
+
+Gateway error responses SHOULD be concise and safe for exposure to an
+untrusted intermediary. They SHOULD indicate the failure class without
+revealing sensitive verifier internals.
+
+Example response body:
+
+```json
+{
+  "error": "invalid_token",
+  "reason": "signature_verification_failed"
+}
+```
+Example rejection cases include:
+
+- missing_token
+- invalid_token
+- expired_token
+- replayed_token
+- context_mismatch
+- policy_denied
+- user_rejected
+
+### Fail-closed requirement
+
+All verification failures are fail-closed.
+
+If verification cannot be completed, the gateway MUST deny the request by
+default and MUST NOT dispatch it to the backend. The backend MUST accept
+requests only from the gateway and MUST treat direct merchant access as
+unauthorized.
+
+---
+
 ## v0.1 note
 
 This document describes the handshake at a normative conceptual level for v0.1.
