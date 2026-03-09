@@ -1,89 +1,271 @@
-# Threat Model
+# Threat Model — Cryptographic Intent Verification System
 
-This document lists important threat categories relevant to the VFA architecture.
+This document covers threat categories relevant to a three-party intent verification
+architecture: **user wallet → merchant frontend → API gateway → backend services**.
 
----
-
-## Token replay
-
-An attacker attempts to reuse a valid token after initial issuance.
-
-### Mitigations
-
-- short token lifetime
-- request nonces
-- token identifiers
-- replay caches
-- revocation support
+The wallet signs intents; the gateway verifies and executes them.
+The merchant frontend is treated as a potentially hostile intermediary.
 
 ---
 
-## Token forgery
+## Token / Intent Replay
 
-An attacker attempts to create a fake token.
+An attacker reuses a valid, signed intent after initial issuance.
+
+### Variants
+- **Network replay** — captured intent re-sent from a MITM position
+- **Merchant-driven replay** — merchant stores and re-submits an intent later
+- **Cross-context replay** — intent reused against a different merchant or endpoint
 
 ### Mitigations
-
-- cryptographic signatures
-- protected signing keys
-- deterministic verification rules
+- Short intent lifetime (≤ 60 s), enforced server-side
+- 128-bit CSPRNG nonce per intent; server-side nonce deduplication store
+- Context binding: `merchantId` + `endpoint` + `userId` included in the signed payload
+- Idempotency keys on the API
 
 ---
 
-## Audience confusion
+## Token / Intent Forgery
 
-A valid token intended for one relying party is reused against another.
+An attacker constructs a fake intent or modifies a signed one.
 
 ### Mitigations
-
-- audience binding (`aud`)
-- strict verifier checks
+- Ed25519 or ECDSA P-256 signatures; PKCS#1 v1.5 and `alg: none` disallowed
+- Canonical serialization (JCS / RFC 8785) before signing
+- All security-relevant fields covered by the signature
+- Algorithm pinning: `alg` field included in the signed payload
 
 ---
 
-## Scope escalation
+## Audience and Context Confusion
 
-A token approved for one action is reused for a broader action.
+A valid intent is used in a context other than the one it was issued for.
+
+### Variants
+- **Audience confusion** — intent accepted by a different relying party (`aud` mismatch)
+- **Context drift** — intent replayed under a different `merchantId` or endpoint
+- **Session injection** — valid intent injected into a different user session
 
 ### Mitigations
-
-- explicit scope definition
-- exact scope matching
-- narrow token lifetime
+- Strict `aud` / `merchantId` / `endpoint` binding in the signed payload
+- Gateway enforces exact context match before execution
+- Session anomaly detection: session–user–intent correlation checked at runtime
 
 ---
 
-## Unauthorized direct access
+## Scope Escalation
 
-A request bypasses approval logic and attempts to access a protected service directly.
+A token or intent approved for one action is reused for a broader or different action.
 
 ### Mitigations
-
-- mandatory gateway enforcement
-- deny-by-default routing
-- backend verification where appropriate
+- Explicit, narrow scope per intent; exact scope matching at verification
+- Short token lifetime; scope included in the signed payload
+- Aggregated risk scoring: cumulative scope across a session, not only per-intent
 
 ---
 
-## Compromised merchant behavior
+## Downgrade Attack
 
-A requesting application tries to obtain more approval than needed or misrepresents the requested action.
+An attacker forces a weaker cryptographic protocol or algorithm version.
+
+### Variants
+- TLS downgrade (TLS 1.3 → legacy)
+- Signature algorithm downgrade (e.g. P-521 → P-256, or to PKCS#1 v1.5)
+- API version downgrade (to a version lacking security controls)
 
 ### Mitigations
-
-- clear wallet UX
-- explicit scope display
-- auditing and policy controls
+- TLS 1.3 only; HSTS with `includeSubDomains`; `TLS_FALLBACK_SCSV`
+- Algorithm allowlist enforced by the gateway; no negotiation of weaker algorithms
+- Old API versions deactivated; minimum supported version enforced
 
 ---
 
-## Key compromise
+## Impersonation
 
-Signing or verification material is exposed.
+An attacker poses as a legitimate party (merchant, gateway, or user).
+
+### Variants
+- **Fake merchant frontend** — phishing site tricks user into signing a malicious intent
+- **Gateway impersonation** — DNS/BGP hijack redirects signed intents to a rogue endpoint
+- **User impersonation** — stolen credentials used to authenticate as a legitimate user
 
 ### Mitigations
+- PKI-based merchant certificates; signed `merchantId` verified by the wallet
+- Mutual TLS (mTLS) on all service-to-service channels; endpoint pinning in the wallet
+- Hardware MFA (FIDO2 / WebAuthn); wallet presence proof required per intent
 
-- secure key storage
-- key rotation
-- key separation between environments
-- incident response procedures
+---
+
+## Compromised Merchant Behavior
+
+The merchant frontend actively manipulates the intent to the user's detriment.
+
+### Variants
+- **UI spoofing** — user sees different intent than what is signed (visual mismatch)
+- **Parameter injection** — extra or modified fields appended after signing
+- **Visual fatigue manipulation** — critical fields hidden below the fold or in fine print
+- **Multiple submission** — single approval used to trigger multiple API calls
+
+### Mitigations
+- Wallet renders intent summary independently from structured schema; no free-text from merchant in approval UI
+- Signature covers all critical fields; gateway rejects any unsigned additions
+- Nonce: one intent = one execution; server-side deduplication
+
+---
+
+## Approval Fatigue
+
+Users reflexively approve requests without reading them after repeated prompts.
+
+### Mitigations
+- Rate limit on approvals (e.g. max 5 per minute per session)
+- High-risk intents require explicit re-confirmation with highlighted risk fields
+- Aggregated risk threshold: daily/session cumulative limits, not only per-intent
+- Wallet displays running count: *"3rd approval in the last 5 minutes"*
+
+---
+
+## Policy Bypass and Lateral Movement
+
+A compromised or malicious backend calls internal services directly,
+bypassing the gateway's intent verification layer.
+
+### Mitigations
+- Zero-trust network segmentation: internal APIs reachable only via the gateway service account
+- All internal calls authenticated with mTLS; unsigned or gateway-bypass requests rejected and alerted
+- Policy-as-Code: gateway configuration version-controlled, peer-reviewed, with change alerting
+- Immutable infrastructure principles for gateway deployments
+
+---
+
+## Intent Laundering
+
+Individual intents appear legitimate in isolation but form part of a coordinated
+attack chain (e.g. `approve upload` → `approve permission change` → `approve export`).
+
+### Mitigations
+- Workflow-level audit: intent sequences analysed, not only individual intents
+- Anomaly detection on unusual action combinations within a time window
+- Intent scope restricted per merchant context (limits cross-context chaining)
+- Context binding (see above) constrains which intent types are valid per merchant
+
+---
+
+## Execution Mismatch
+
+The backend executes an action different from the signed and verified intent —
+the gap between gateway verification and actual backend dispatch.
+
+### Mitigations
+- Intent commitment: gateway commits to the `intentHash` before dispatching to the backend;
+  backend executes only against the committed intent, never a re-interpreted version
+- Execution receipt returned by the backend and validated by the gateway against
+  the original `intentHash`; gateway rejects any response not bound to the committed intent
+- Execution result verified by the wallet: the wallet validates the receipt against
+  the `intentHash` it signed, giving the user an independent end-to-end check
+- Gateway verification performed immediately before dispatch (not cached from an earlier step)
+
+---
+
+## Unauthorized Direct Access
+
+A request bypasses approval logic and reaches a protected service directly.
+
+### Mitigations
+- Mandatory gateway enforcement; deny-by-default routing
+- Backend verifies every request originates from the gateway (mTLS service identity)
+- No direct external exposure of internal service endpoints
+
+---
+
+## Key Compromise
+
+Signing or verification key material is exposed.
+
+### Mitigations
+- Hardware-backed key storage (HSM / TEE) in the wallet; private key never exported
+- Key rotation with bounded validity period (≤ 1 year)
+- Real-time revocation propagation to all gateway nodes (≤ 30 s)
+- Key separation across environments (dev / staging / prod)
+- Incident response procedure defined and tested
+
+---
+
+## Revocation Failures
+
+Revoked tokens, intents, or keys continue to be accepted.
+
+### Mitigations
+- OCSP stapling / real-time key-status API at every gateway node
+- Short token lifetime as primary defence; revocation as secondary layer
+- Intent revocation endpoint; nonce store used to invalidate outstanding intents
+- Revocation events propagated immediately via pub/sub
+
+---
+
+## Delegation Abuse
+
+Delegated execution rights are broader, longer-lived, or more transferable than intended.
+
+### Mitigations
+- Least-privilege delegation: explicit scope, action list, and TTL in the signed payload
+- Maximum delegation depth: 1 level; re-delegation disallowed
+- Sender-constrained delegated tokens (DPoP)
+- Anomaly detection on delegated token usage patterns
+
+---
+
+## Audit Integrity Failures
+
+Execution logs are tampered with or incomplete, preventing accountability.
+
+### Mitigations
+- Cryptographically chained (hash-chain), append-only audit log
+- WORM storage for audit data; independent external audit server with real-time mirroring
+- Sequence numbers on intents; gap detection for missing entries
+- Structured mandatory logging on all API paths, including exception handlers
+
+---
+
+## AI Agent Interactions
+
+Autonomous AI agents request intent approvals on behalf of users,
+introducing new delegation and attestation risks.
+
+### Variants
+- **Autonomous over-reach** — agent generates intents the user did not intend
+- **Prompt injection** — malicious content in processed data (e.g. uploaded file) instructs
+  the agent to generate unintended intents without user awareness
+- **Intent spam / delegation chain** — agent generates high-volume or cascading intent requests
+
+### Mitigations
+- Agent identity attestation: cryptographic proof that agent acts under explicit user delegation
+- Human-in-the-loop thresholds by risk level; high-risk intents always require manual approval
+- Structured intent schema required; free-text → intent conversion via audited intermediate step
+- Agent-generated intents visually distinguished in wallet UI (source labelled)
+- Rate limiting on agent-initiated intents; sandboxed processing of external content
+- Explicit delegation policy: agent scope, TTL, and permitted action list defined at delegation time
+
+---
+
+## Threat Summary
+
+| ID | Category | Severity |
+|----|----------|----------|
+| T-01 | Intent Replay (network / merchant / cross-context) | Critical |
+| T-02 | Intent Forgery | Critical |
+| T-03 | Audience and Context Confusion | High |
+| T-04 | Scope Escalation | High |
+| T-05 | Downgrade Attack | High |
+| T-06 | Impersonation (merchant / gateway / user) | Critical |
+| T-07 | Compromised Merchant Behavior | Critical |
+| T-08 | Approval Fatigue | High |
+| T-09 | Policy Bypass and Lateral Movement | Critical |
+| T-10 | Intent Laundering | High |
+| T-11 | Execution Mismatch | Critical |
+| T-12 | Unauthorized Direct Access | High |
+| T-13 | Key Compromise | Critical |
+| T-14 | Revocation Failures | High |
+| T-15 | Delegation Abuse | High |
+| T-16 | Audit Integrity Failures | High |
+| T-17 | AI Agent Interactions | High / Critical |
