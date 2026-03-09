@@ -113,6 +113,22 @@ The merchant frontend actively manipulates the intent to the user's detriment.
 
 ---
 
+## Execution Mismatch
+
+The backend executes an action different from the signed and verified intent —
+the gap between gateway verification and actual backend dispatch.
+
+### Mitigations
+- Intent commitment: gateway commits to the `intentHash` before dispatching to the backend;
+  backend executes only against the committed intent, never a re-interpreted version
+- Execution receipt returned by the backend and validated by the gateway against
+  the original `intentHash`; gateway rejects any response not bound to the committed intent
+- Execution result verified by the wallet: the wallet validates the receipt against
+  the `intentHash` it signed, giving the user an independent end-to-end check
+- Gateway verification performed immediately before dispatch (not cached from an earlier step)
+
+---
+
 ## Approval Fatigue
 
 Users reflexively approve requests without reading them after repeated prompts.
@@ -148,22 +164,6 @@ attack chain (e.g. `approve upload` → `approve permission change` → `approve
 - Anomaly detection on unusual action combinations within a time window
 - Intent scope restricted per merchant context (limits cross-context chaining)
 - Context binding (see above) constrains which intent types are valid per merchant
-
----
-
-## Execution Mismatch
-
-The backend executes an action different from the signed and verified intent —
-the gap between gateway verification and actual backend dispatch.
-
-### Mitigations
-- Intent commitment: gateway commits to the `intentHash` before dispatching to the backend;
-  backend executes only against the committed intent, never a re-interpreted version
-- Execution receipt returned by the backend and validated by the gateway against
-  the original `intentHash`; gateway rejects any response not bound to the committed intent
-- Execution result verified by the wallet: the wallet validates the receipt against
-  the `intentHash` it signed, giving the user an independent end-to-end check
-- Gateway verification performed immediately before dispatch (not cached from an earlier step)
 
 ---
 
@@ -250,22 +250,22 @@ introducing new delegation and attestation risks.
 
 ## Threat Summary
 
-| ID | Category | Severity |
-|----|----------|----------|
+| ID   | Category                                   | Severity        |
+|------|--------------------------------------------|-----------------|
 | T-01 | Intent Replay (network / merchant / cross-context) | Critical |
-| T-02 | Intent Forgery | Critical |
-| T-03 | Audience and Context Confusion | High |
-| T-04 | Scope Escalation | High |
-| T-05 | Downgrade Attack | High |
-| T-06 | Impersonation (merchant / gateway / user) | Critical |
-| T-07 | Compromised Merchant Behavior | Critical |
-| T-08 | Approval Fatigue | High |
-| T-09 | Policy Bypass and Lateral Movement | Critical |
-| T-10 | Intent Laundering | High |
-| T-11 | Execution Mismatch | Critical |
-| T-12 | Unauthorized Direct Access | High |
-| T-13 | Key Compromise | Critical |
-| T-14 | Revocation Failures | High |
-| T-15 | Delegation Abuse | High |
-| T-16 | Audit Integrity Failures | High |
-| T-17 | AI Agent Interactions | High / Critical |
+| T-02 | Intent Forgery                             | Critical |
+| T-03 | Audience and Context Confusion             | High |
+| T-04 | Scope Escalation                           | High |
+| T-05 | Downgrade Attack                           | High |
+| T-06 | Impersonation (merchant / gateway / user)  | Critical |
+| T-07 | Compromised Merchant Behavior              | Critical |
+| T-08 | Execution Mismatch                         | Critical |
+| T-09 | Approval Fatigue                           | High |
+| T-10 | Policy Bypass and Lateral Movement         | Critical |
+| T-11 | Intent Laundering                          | High |
+| T-12 | Unauthorized Direct Access                 | High |
+| T-13 | Key Compromise                             | Critical |
+| T-14 | Revocation Failures                        | High |
+| T-15 | Delegation Abuse                           | High |
+| T-16 | Audit Integrity Failures                   | High |
+| T-17 | AI Agent Interactions                      | High / Critical |
