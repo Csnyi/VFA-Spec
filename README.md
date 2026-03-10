@@ -59,6 +59,30 @@ Implementation and demonstration projects:
 - **VFA-MVP** — reference implementation of the handshake flow → https://github.com/Csnyi/VFA-MVP
 - **VFA-Lab** — architecture sandbox and gateway routing demo → https://github.com/Csnyi/VFA-Lab
 
+### VFA-MVP protocol notes (v0.1)
+
+VFA-MVP implements the handshake flow defined in this specification with the following
+characteristics relevant to v0.1:
+
+- **Issuer role** is fulfilled by the Flask backend (`backend/server.py`)
+- **Token format**: `base64url(JSON payload) + "." + base64url(HMAC-SHA256(secret, payload_b64))`  
+  This is a lab-only format; production deployments MUST use asymmetric signatures (Ed25519 / ECDSA P-256)
+- **Approval window** (`ttlSec`) and token lifetime (`exp`) are tracked separately in SQLite
+- **Nonce / replay protection** is not implemented in the MVP — listed as a known limitation
+- **Scope** is represented as a JSON list (e.g. `["age_over_18", "loyalty_id"]`) rather than
+  the recommended `namespace:action` string; a `scopeHash` (SHA-256) is stored in the visa record
+
+### VFA-Lab protocol notes (v0.1)
+
+VFA-Lab implements the gateway and policy enforcement layer defined in this specification:
+
+- **Policy outcomes**: `prod` (valid token), `sandbox` (missing / invalid token), `deny` (by policy config)
+- **Token verification** uses HMAC shared secret (lab only); asymmetric verification is the declared next step
+- **Revocation** is implemented as a local JSON store at the gateway; distributed revocation is a known gap
+- **DEFAULT_ROUTE** environment variable controls the unauthenticated routing policy
+- The gateway demonstrates the **L3.5 conceptual overlay** — policy enforcement logically between IP routing
+  and application processing; see [docs/FUTURE.md](docs/FUTURE.md) for the extended vision
+
 ---
 
 ## Specification documents
@@ -72,6 +96,7 @@ Implementation and demonstration projects:
 | [THREAT_MODEL.md](THREAT_MODEL.md) | Threat analysis |
 | [GLOSSARY.md](GLOSSARY.md) | Authoritative terminology definitions |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [docs/FUTURE.md](docs/FUTURE.md) | Post-v0.1 vision: L3.5, wallet-signed intent, delegation |
 
 ---
 
@@ -90,7 +115,9 @@ VFA-Spec
 ├─ PATENTS
 ├─ LICENSE
 ├─ diagrams/
-└─ examples/
+├─ examples/
+└─ docs/
+   └─ FUTURE.md
 ```
 
 ---

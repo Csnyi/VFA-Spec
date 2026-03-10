@@ -56,6 +56,37 @@ In current implementations (v0.1), verification occurs at the gateway after TLS 
 
 ---
 
+## v0.1 Implementation Summary
+
+Two reference implementations exist for VFA v0.1.
+
+### VFA-MVP — Handshake reference implementation
+
+VFA-MVP demonstrates the full handshake flow: merchant request → wallet approval →
+visa token issuance → merchant verification.
+
+Key characteristics:
+
+- **Wallet**: browser UI; scans merchant QR, sends ACCEPT/REJECT to server
+- **Issuer (server)**: Flask + SQLite; mints HMAC-SHA256 tokens (lab only)
+- **Token format**: `base64url(payload) + "." + base64url(HMAC-SHA256(secret, payload_b64))`
+- **Scope**: JSON list per request (e.g. `["age_over_18", "loyalty_id"]`)
+- **Known gaps**: no replay protection, no asymmetric signing, CORS open for local dev
+
+### VFA-Lab — Gateway and policy routing demo
+
+VFA-Lab demonstrates the gateway policy enforcement layer.
+
+Key characteristics:
+
+- **Gateway**: Node.js reverse proxy; verifies HMAC token, reads revocation store
+- **Policy outcomes**: `prod` (valid token) / `sandbox` (missing or invalid) / `deny` (by config)
+- **Revocation**: local JSON store; distributed revocation is a declared next step
+- **L3.5 concept**: the gateway acts as a policy decision plane logically between
+  IP routing and application processing
+
+---
+
 ## Design goals
 
 - explicit intent verification
@@ -76,3 +107,6 @@ This draft does not attempt to define:
 - formal interoperability test suites
 
 These can be added in later versions.
+
+For exploratory directions including L3.5 TLS integration, wallet-signed
+intent model, and delegation, see [docs/FUTURE.md](docs/FUTURE.md).
