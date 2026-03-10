@@ -58,6 +58,7 @@ Implementation and demonstration projects:
 
 - **VFA-MVP** — reference implementation of the handshake flow → https://github.com/Csnyi/VFA-MVP
 - **VFA-Lab** — architecture sandbox and gateway routing demo → https://github.com/Csnyi/VFA-Lab
+- **VFA-cloud-PoC** — cloud operation PoC (deployment scenario) → https://github.com/Csnyi/VFA-cloud-PoC
 
 ### VFA-MVP protocol notes (v0.1)
 
