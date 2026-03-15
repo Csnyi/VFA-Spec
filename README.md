@@ -18,6 +18,30 @@ The specification describes:
 
 ---
 
+## What problem does VFA solve?
+
+When a user approves an action online — for example a payment, a deployment,
+or granting access to data — the system is expected to execute **exactly the
+action the user approved**.
+
+In modern distributed systems, requests often pass through multiple services,
+gateways, and automation layers. As a result, the action that is ultimately
+executed may differ from the original user intent due to bugs, misconfiguration,
+or malicious intermediaries.
+
+**Virtual Flow Agreement (VFA)** introduces a cryptographic intent verification
+step that binds the user-approved action to the final execution.
+
+In simple terms:
+
+> **VFA ensures that a system executes exactly the action the user approved — and nothing else.**
+
+Authentication proves *who you are*.  
+Authorization proves *what you are allowed to do*.  
+**VFA proves what you actually approved.**
+
+---
+
 ## Trust Model (v0.1)
 
 VFA v0.1 uses an **issuer-signed visa token model**.
