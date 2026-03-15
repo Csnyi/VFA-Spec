@@ -7,7 +7,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 ## [Unreleased]
 
 ### Added
-- `README` — VFA-cloud-PoC protocol notes (v0.1)
+- `README.md` — VFA-cloud-PoC protocol notes (v0.1)
 - `PATENTS.md` — clarified patent scope
 - `docs/FUTURE.md` — post-v0.1 vision document: L3.5 TLS integration concept, wallet-signed intent model, delegation extension, scope registry, formal test suites
 - `README.md` — VFA-MVP and VFA-Lab protocol notes: implementation-specific characteristics mapped to v0.1 spec (token format, scope representation, known gaps)
