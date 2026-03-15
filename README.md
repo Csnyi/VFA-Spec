@@ -132,7 +132,7 @@ VFA-Spec
 ├─ THREAT_MODEL.md
 ├─ GLOSSARY.md
 ├─ CHANGELOG.md
-├─ PATENTS
+├─ PATENTS.md
 ├─ LICENSE
 ├─ diagrams/
 ├─ examples/
