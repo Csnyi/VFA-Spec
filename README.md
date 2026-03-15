@@ -85,6 +85,24 @@ VFA-Lab implements the gateway and policy enforcement layer defined in this spec
 - The gateway demonstrates the **L3.5 conceptual overlay** — policy enforcement logically between IP routing
   and application processing; see [docs/FUTURE.md](docs/FUTURE.md) for the extended vision
 
+### VFA-cloud-PoC protocol notes (v0.1)
+
+VFA-cloud-PoC demonstrates the VFA handshake applied to cloud operations where critical actions must be verified before execution.
+
+Key characteristics:
+
+- **Use case**: verification of user intent before sensitive operations (e.g. deployment or production actions)
+- **Actor mapping**:
+  - Wallet → user approval interface
+  - Issuer → intent verification service
+  - Gateway → policy enforcement before the operation
+  - Backend → cloud operation executor
+- **Intent binding**: the operation request references the verified intent artifact before execution
+- **Execution model**: backend must execute the operation corresponding to the committed intent
+- **Threat focus**: prevention of *execution mismatch* where an executed action differs from the user-approved intent
+
+This PoC illustrates how the VFA mechanism can be applied to operational workflows such as CI/CD pipelines and production deployment controls.
+
 ---
 
 ## Specification documents
@@ -139,7 +157,7 @@ The VFA concept may be subject to patent applications.
 The specification in this repository is published to support
 open research and interoperable implementations.
 
-See the [PATENTS](PATENTS) file for additional information.
+See the [PATENTS](PATENTS.md) file for additional information.
 
 ---
 
