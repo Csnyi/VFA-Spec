@@ -52,7 +52,7 @@ A valid intent is used in a context other than the one it was issued for.
 ### Mitigations
 - Strict `aud` / `merchantId` / `endpoint` binding in the signed payload
 - Gateway enforces exact context match before execution
-- Session anomaly detection: session–user–intent correlation checked at runtime
+- Session anomaly detection: session-user-intent correlation checked at runtime
 
 ---
 
