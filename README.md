@@ -207,3 +207,21 @@ Potential fields include:
 - `delegationExp`
 
 Delegation is not normative in VFA v0.1.
+
+---
+
+## Acknowledgements
+
+This project is the result of iterative exploration, experimentation, and cross-domain thinking across distributed systems, security, and API design.
+
+Special thanks to:
+
+- the open-source community for inspiration and foundational ideas
+- researchers and engineers working on zero-trust, cryptographic verification, and secure system design
+- early readers, reviewers, and contributors providing feedback and direction
+
+This work was also shaped through extensive design iteration, discussion, and prototyping with the assistance of AI-supported development tools.
+
+If you find this work valuable, your star helps signal relevance, supports visibility, and encourages further development.
+
+The goal of VFA is to contribute a clear and practical step forward in making **user intent verifiable, enforceable, and auditable** in modern systems.

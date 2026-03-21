@@ -85,6 +85,25 @@ Key characteristics:
 - **L3.5 concept**: the gateway acts as a policy decision plane logically between
   IP routing and application processing
 
+### VFA-cloud-PoC — Cloud operation intent verification
+
+VFA-cloud-PoC demonstrates how the VFA model applies to real-world
+operational workflows, particularly in cloud and deployment environments.
+
+Key characteristics:
+
+- **Use case**: verification of user intent before executing sensitive operations such as production deployments or infrastructure changes
+- **Actor mapping**:
+  - Wallet → user approval interface (human-in-the-loop confirmation)
+  - Issuer → intent verification service
+  - Gateway → policy enforcement layer before execution
+  - Backend → cloud operation executor (e.g. CI/CD pipeline)
+- **Intent binding**: the operation request is cryptographically bound to a verified intent artifact before execution
+- **Execution guarantee model**: the backend must execute only the action corresponding to the verified intent, without reinterpretation
+- **Threat focus**: mitigation of *execution mismatch* — where the executed action differs from the user-approved intent
+
+This PoC extends the VFA concept beyond API access control into **operational security**, demonstrating how intent verification can be used to protect high-impact actions in distributed systems.
+
 ---
 
 ## Design goals
