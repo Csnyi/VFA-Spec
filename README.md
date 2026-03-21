@@ -20,17 +20,11 @@ The specification describes:
 
 ## What problem does VFA solve?
 
-When a user approves an action online — for example a payment, a deployment,
-or granting access to data — the system is expected to execute **exactly the
-action the user approved**.
+When a user approves an action online — for example a payment, a deployment, or granting access to data — the system is expected to execute **exactly the action the user approved**.
 
-In modern distributed systems, requests often pass through multiple services,
-gateways, and automation layers. As a result, the action that is ultimately
-executed may differ from the original user intent due to bugs, misconfiguration,
-or malicious intermediaries.
+In modern distributed systems, requests often pass through multiple services, gateways, and automation layers. As a result, the action that is ultimately executed may differ from the original user intent due to bugs, misconfiguration, or malicious intermediaries.
 
-**Virtual Flow Agreement (VFA)** introduces a cryptographic intent verification
-step that binds the user-approved action to the final execution.
+**Virtual Flow Agreement (VFA)** introduces a cryptographic intent verification step that binds the user-approved action to the final execution.
 
 In simple terms:
 
@@ -87,8 +81,7 @@ Implementation and demonstration projects:
 
 ### VFA-MVP protocol notes (v0.1)
 
-VFA-MVP implements the handshake flow defined in this specification with the following
-characteristics relevant to v0.1:
+VFA-MVP implements the handshake flow defined in this specification with the following characteristics relevant to v0.1:
 
 - **Issuer role** is fulfilled by the Flask backend (`backend/server.py`)
 - **Token format**: `base64url(JSON payload) + "." + base64url(HMAC-SHA256(secret, payload_b64))`  
@@ -178,8 +171,7 @@ This allows independent implementations of the protocol.
 
 The VFA concept may be subject to patent applications.
 
-The specification in this repository is published to support
-open research and interoperable implementations.
+The specification in this repository is published to support open research and interoperable implementations.
 
 See the [PATENTS](PATENTS.md) file for additional information.
 

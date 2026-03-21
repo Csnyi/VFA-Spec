@@ -1,10 +1,8 @@
 # Security Model
 
-VFA assumes that certain digital interactions must require
-cryptographic proof of explicit user consent before execution.
+VFA assumes that certain digital interactions must require cryptographic proof of explicit user consent before execution.
 
-In VFA v0.1, the **issuer** is the sole authority that signs and mints
-visa tokens. The wallet collects user approval; it does not sign tokens directly.
+In VFA v0.1, the **issuer** is the sole authority that signs and mints visa tokens. The wallet collects user approval; it does not sign tokens directly.
 
 ---
 
@@ -12,8 +10,7 @@ visa tokens. The wallet collects user approval; it does not sign tokens directly
 
 **Visa Token**
 
-A short-lived cryptographically signed artifact issued by the VFA issuer
-that binds:
+A short-lived cryptographically signed artifact issued by the VFA issuer that binds:
 
 - user identity
 - declared intent
@@ -21,8 +18,7 @@ that binds:
 - endpoint
 - expiration
 
-The gateway MUST verify the visa token before any protected request
-is dispatched to the backend.
+The gateway MUST verify the visa token before any protected request is dispatched to the backend.
 
 ---
 
@@ -116,9 +112,7 @@ These two values are distinct. A long approval window does not imply a long toke
 
 ## Demo / lab note
 
-A shared-secret HMAC scheme may be used in a demonstration or laboratory
-environment as a temporary measure. It must not be used in production.
-Algorithm negotiation and `alg: none` are disallowed in all environments.
+A shared-secret HMAC scheme may be used in a demonstration or laboratory environment as a temporary measure. It must not be used in production. Algorithm negotiation and `alg: none` are disallowed in all environments.
 
 ---
 

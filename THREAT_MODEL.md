@@ -1,13 +1,10 @@
 # Threat Model — Cryptographic Intent Verification System
 
-This document covers threat categories relevant to the VFA four-party intent verification
-architecture: **user wallet → merchant frontend → issuer → API gateway → backend services**.
+This document covers threat categories relevant to the VFA four-party intent verification architecture: **user wallet → merchant frontend → issuer → API gateway → backend services**.
 
-In VFA v0.1, the **issuer** signs and mints visa tokens based on explicit user approval collected by the wallet.
-The merchant frontend is treated as a potentially hostile intermediary.
+In VFA v0.1, the **issuer** signs and mints visa tokens based on explicit user approval collected by the wallet. The merchant frontend is treated as a potentially hostile intermediary.
 
-> **Terminology note:** This document uses "intent" to refer to the user-approved action declaration,
-> and "visa token" for the issuer-signed cryptographic artifact. These are distinct concepts.
+> **Terminology note:** This document uses "intent" to refer to the user-approved action declaration, and "visa token" for the issuer-signed cryptographic artifact. These are distinct concepts.
 
 ---
 
@@ -118,16 +115,12 @@ The merchant frontend actively manipulates the intent to the user's detriment.
 
 ## T-08: Execution Mismatch
 
-Threat: The backend executes an action different from the signed and verified intent —
-the gap between gateway verification and actual backend dispatch.
+Threat: The backend executes an action different from the signed and verified intent — the gap between gateway verification and actual backend dispatch.
 
 ### Mitigations
-- Intent commitment: gateway commits to the `intentHash` (a hash of the verified visa token payload)
-  before dispatching to the backend; backend executes only against the committed intent
-- Execution receipt returned by the backend and validated by the gateway against
-  the original `intentHash`; gateway rejects any response not bound to the committed intent
-- Execution result may be independently verified by the wallet against the approved intent summary
-  (future extension — not normative in v0.1)
+- Intent commitment: gateway commits to the `intentHash` (a hash of the verified visa token payload) before dispatching to the backend; backend executes only against the committed intent
+- Execution receipt returned by the backend and validated by the gateway against the original `intentHash`; gateway rejects any response not bound to the committed intent
+- Execution result may be independently verified by the wallet against the approved intent summary (future extension — not normative in v0.1)
 - Gateway verification performed immediately before dispatch (not cached from an earlier step)
 
 > Note: `intentHash` is a gateway-internal binding mechanism; it is not a token field in v0.1.
@@ -148,8 +141,7 @@ Users reflexively approve requests without reading them after repeated prompts.
 
 ## Policy Bypass and Lateral Movement
 
-A compromised or malicious backend calls internal services directly,
-bypassing the gateway's intent verification layer.
+A compromised or malicious backend calls internal services directly, bypassing the gateway's intent verification layer.
 
 ### Mitigations
 - Zero-trust network segmentation: internal APIs reachable only via the gateway service account
@@ -161,8 +153,7 @@ bypassing the gateway's intent verification layer.
 
 ## Intent Laundering
 
-Individual intents appear legitimate in isolation but form part of a coordinated
-attack chain (e.g. `approve upload` → `approve permission change` → `approve export`).
+Individual intents appear legitimate in isolation but form part of a coordinated attack chain (e.g. `approve upload` → `approve permission change` → `approve export`).
 
 ### Mitigations
 - Workflow-level audit: intent sequences analysed, not only individual intents
@@ -234,13 +225,11 @@ Execution logs are tampered with or incomplete, preventing accountability.
 
 ## AI Agent Interactions
 
-Autonomous AI agents request intent approvals on behalf of users,
-introducing new delegation and attestation risks.
+Autonomous AI agents request intent approvals on behalf of users, introducing new delegation and attestation risks.
 
 ### Variants
 - **Autonomous over-reach** — agent generates intents the user did not intend
-- **Prompt injection** — malicious content in processed data (e.g. uploaded file) instructs
-  the agent to generate unintended intents without user awareness
+- **Prompt injection** — malicious content in processed data (e.g. uploaded file) instructs the agent to generate unintended intents without user awareness
 - **Intent spam / delegation chain** — agent generates high-volume or cascading intent requests
 
 ### Mitigations
