@@ -138,8 +138,7 @@ Future versions of VFA may introduce standardized scope namespaces or registry m
 }
 ```
 
-> Note: `exp - iat` should not exceed 60 seconds in production deployments.
-> See the [Time Formats](#time-formats) section below.
+> Note: `exp - iat` should not exceed 60 seconds in production deployments. See the [Time Formats](#time-formats) section below.
 
 ---
 
@@ -209,6 +208,4 @@ Example: `"ttlMs": 300000` (= 300 seconds)
 
 Example: `"iat": 1710000000, "exp": 1710000060` (= 60-second validity window)
 
-> Production deployments SHOULD enforce a maximum token lifetime of **60 seconds** (`exp - iat ≤ 60`).
-> The 300-second window shown in handshake examples is the user-facing approval window,
-> not the token validity period.
+> Production deployments SHOULD enforce a maximum token lifetime of **60 seconds** (`exp - iat ≤ 60`). The 300-second window shown in handshake examples is the user-facing approval window, not the token validity period.

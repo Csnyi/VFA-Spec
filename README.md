@@ -64,9 +64,7 @@ The **visa token** is the cryptographic artifact binding:
 - policy scope
 - expiration
 
-> The wallet-signed intent model (where the user's wallet directly signs the
-> artifact rather than an issuer) is considered a future extension and is not
-> normative in v0.1.
+> The wallet-signed intent model (where the user's wallet directly signs the artifact rather than an issuer) is considered a future extension and is not normative in v0.1.
 
 ---
 
